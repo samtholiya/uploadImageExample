@@ -26,7 +26,6 @@ public class UploadImage {
     public static JSONObject uploadImage(File file) {
 
         try {
-
             final MediaType MEDIA_TYPE_PNG = MediaType.parse("image/png");
 
             RequestBody req = new MultipartBody.Builder().setType(MultipartBody.FORM)

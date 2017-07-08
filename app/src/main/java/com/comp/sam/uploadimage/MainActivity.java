@@ -16,15 +16,22 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.comp.sam.uploadlibrary.OnUploadCompleteListener;
+import com.comp.sam.uploadlibrary.OnUploadExceptionListener;
+import com.comp.sam.uploadlibrary.UploadFile;
+
 import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import okhttp3.Response;
+
 import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
 import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements OnUploadCompleteListener,OnUploadExceptionListener{
     Uri fileUri;
     private static final String TAG = "MainActivity";
     private Button imageCapture,imageUpload;
@@ -61,12 +68,21 @@ public class MainActivity extends AppCompatActivity {
         imageUpload.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new Thread(new Runnable() {
+                UploadFile.Builder()
+                        .setContentType("image/png")
+                        .setFile(new File(fileUri.getPath()))
+                        .setName("bill")
+                        .setFileName("profile.png")
+                        .setUrl("http://mahabodhibahuuddeshiysansthaa.org/parichay-app/UploadImg.php")
+                        .addOnUploadCompleteListener(MainActivity.this)
+                        .addOnUploadExceptionListener(MainActivity.this)
+                        .start();
+                /*new Thread(new Runnable() {
                     @Override
                     public void run() {
                         UploadImage.uploadImage(new File(fileUri.getPath()));
                     }
-                }).start();
+                }).start();*/
             }
         });
     }
@@ -155,5 +171,19 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return mediaFile;
+    }
+
+    @Override
+    public void onUploadError(Exception exception) {
+        Log.e(TAG, "Error: " + exception.getLocalizedMessage());
+    }
+
+    @Override
+    public void onUploadComplete(Response response) {
+        try {
+            Toast.makeText(this, response.body().string(),Toast.LENGTH_LONG).show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
